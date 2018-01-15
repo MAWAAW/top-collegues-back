@@ -17,7 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.topcolleguesbackend.entite.Collegue;
 import com.example.topcolleguesbackend.entite.Opinion;
+import com.example.topcolleguesbackend.entite.Vote;
 import com.example.topcolleguesbackend.repository.CollegueRepository;
+import com.example.topcolleguesbackend.repository.VoteRepository;
 
 @RestController
 @RequestMapping("/collegues")
@@ -25,6 +27,7 @@ import com.example.topcolleguesbackend.repository.CollegueRepository;
 public class CollegueController {
 
 	@Autowired private CollegueRepository collegueRepo;
+	@Autowired private VoteRepository voteRepo;
 	
 	@GetMapping()
 	public List<Collegue> listerCollegues() {
@@ -65,14 +68,17 @@ public class CollegueController {
 	public Collegue patchCollegue(@PathVariable("pseudo") String pseudo,
 			@RequestBody Opinion opinion) {
 		Collegue collegue = this.collegueRepo.findByPseudo(pseudo);
-
 		if(collegue != null) {
 			if(opinion.getAction().equals("aimer")) {
 				collegue.setScore(collegue.getScore()+10);
+				Vote v = new Vote("aimé",collegue);
+				this.voteRepo.save(v);
 				this.collegueRepo.save(collegue);
 			}
 			else if(opinion.getAction().equals("detester")) {
 				collegue.setScore(collegue.getScore()-5);
+				Vote v = new Vote("detesté",collegue);
+				this.voteRepo.save(v);
 				this.collegueRepo.save(collegue);
 			}
 		}
